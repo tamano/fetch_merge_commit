@@ -1,4 +1,5 @@
 use std::{env, process};
+use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
 
@@ -9,14 +10,10 @@ fn main() {
         process::exit(1);
     });
 
-    let mut f = File::open(config.filename)
-        .expect("File not found");
-
-    let mut text = String::new();
-    f.read_to_string(&mut text)
-        .expect("File unreadable");
-
-    println!("{}", text)
+    if let Err(e) = run(config) {
+        println!("Error: Application error: {}", e);
+        process::exit(1);
+    }
 }
 
 struct Config {
@@ -33,4 +30,15 @@ impl Config {
 
         Ok(Config { filename })
     }
+}
+
+fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    let mut f = File::open(config.filename)?;
+
+    let mut text = String::new();
+    f.read_to_string(&mut text)?;
+
+    println!("{}", text);
+
+    Ok(())
 }
